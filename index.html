@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>分分彩樣式 Demo</title>
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
+  <style>
+    * { box-sizing: border-box; }
+    :root {
+      --body-bg: #cfcfcf;
+      --panel-bg: #dbdbdb;
+      --panel-head-bg: #efefef;
+      --panel-border: #c1c1c1;
+      --panel-head-border: #c6c6c6;
+      --text-main: #1f1f1f;
+      --text-sub: #656565;
+      --header-bg: #efefef;
+      --header-border: #c4c4c4;
+      --slider-bg: #ececec;
+      --slider-border: #c6c6c6;
+      --shadow: 0 4px 18px rgba(0,0,0,0.05);
+    }
+    body.dark {
+      --body-bg: #5b5b5b;
+      --panel-bg: #4b4b4b;
+      --panel-head-bg: #3f3f3f;
+      --panel-border: #626262;
+      --panel-head-border: #5a5a5a;
+      --text-main: #f1f1f1;
+      --text-sub: #d0d0d0;
+      --header-bg: #3f3f3f;
+      --header-border: #5a5a5a;
+      --slider-bg: #434343;
+      --slider-border: #666666;
+      --shadow: 0 6px 22px rgba(0,0,0,0.18);
+    }
+    body {
+      margin: 0;
+      font-family: Arial, "PingFang TC", "Microsoft JhengHei", sans-serif;
+      background: var(--body-bg);
+      color: var(--text-main);
+      transition: background 0.25s ease, color 0.25s ease;
+    }
+    .page {
+      max-width: 1480px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+    .header {
+      background: var(--header-bg);
+      border: 1px solid var(--header-border);
+      border-radius: 12px;
+      padding: 18px 20px;
+      margin-bottom: 18px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+      transition: background 0.25s ease, border-color 0.25s ease;
+    }
+    .header h1 {
+      margin: 0;
+      font-size: 28px;
+      font-weight: 800;
+    }
+    .header p {
+      margin: 6px 0 0;
+      font-size: 14px;
+      color: var(--text-sub);
+    }
+    .legend-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 6px 12px;
+      border-radius: 999px;
+      color: #fff;
+      font-size: 13px;
+      font-weight: 700;
+    }
+    .pill.blue { background: #4ea1ff; }
+    .pill.green { background: #45b893; }
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 18px;
+    }
+    .card {
+      background: var(--panel-bg);
+      border: 1px solid var(--panel-border);
+      border-radius: 14px;
+      overflow: hidden;
+      box-shadow: var(--shadow);
+      transition: background 0.25s ease, border-color 0.25s ease;
+    }
+    .card-head {
+      padding: 16px 18px;
+      background: var(--panel-head-bg);
+      border-bottom: 1px solid var(--panel-head-border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 14px;
+      flex-wrap: wrap;
+      transition: background 0.25s ease, border-color 0.25s ease;
+    }
+    .card-head h2 {
+      margin: 0;
+      font-size: 20px;
+      font-weight: 800;
+    }
+    .card-head span {
+      color: var(--text-sub);
+      font-size: 14px;
+    }
+    .chart {
+      width: 100%;
+      height: 420px;
+    }
+    .footer-note {
+      margin-top: 16px;
+      color: var(--text-sub);
+      font-size: 13px;
+      text-align: center;
+    }
+    .theme-switch {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 6px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.08);
+    }
+    .theme-btn {
+      border: 1px solid var(--panel-head-border);
+      background: transparent;
+      color: var(--text-main);
+      border-radius: 999px;
+      padding: 8px 14px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .theme-btn.active {
+      background: #1d8f73;
+      border-color: #1d8f73;
+      color: #fff;
+    }
+    @media (max-width: 900px) {
+      .page { padding: 14px; }
+      .chart { height: 360px; }
+      .header h1 { font-size: 24px; }
+      .card-head h2 { font-size: 18px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="header">
+      <div>
+        <h1>分分彩樣式 Demo</h1>
+        <p>折線圖、蠟燭圖、單雙節奏圖</p>
+      </div>
+      <div class="legend-group">
+        <span class="pill blue">單</span>
+        <span class="pill green">雙</span>
+        <div class="theme-switch">
+          <button id="light-btn" class="theme-btn active" type="button">淺色版</button>
+          <button id="dark-btn" class="theme-btn" type="button">深色版</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid">
+      <section class="card">
+        <div class="card-head">
+          <div>
+            <h2>樣式 1</h2>
+            <span>折線圖版</span>
+          </div>
+          <div class="legend-group">
+            <span class="pill blue">單</span>
+            <span class="pill green">雙</span>
+          </div>
+        </div>
+        <div id="chart-style-1" class="chart"></div>
+      </section>
+
+      <section class="card">
+        <div class="card-head">
+          <div>
+            <h2>樣式 2</h2>
+            <span>蠟燭圖版</span>
+          </div>
+          <div class="legend-group">
+            <span class="pill blue">單</span>
+            <span class="pill green">雙</span>
+          </div>
+        </div>
+        <div id="chart-style-2" class="chart"></div>
+      </section>
+
+      <section class="card">
+        <div class="card-head">
+          <div>
+            <h2>樣式 3</h2>
+            <span>單雙節奏圖</span>
+          </div>
+          <div class="legend-group">
+            <span class="pill blue">單</span>
+            <span class="pill green">雙</span>
+          </div>
+        </div>
+        <div id="chart-style-3" class="chart"></div>
+      </section>
+    </div>
+
+    <div class="footer-note">三個圖表都支援 hover tooltip、滑鼠滾輪縮放與拖曳區間。</div>
+  </div>
+
+  <script>
+    const rawLineData = [
+      { time: '14:30', value: 70034.29, type: '單' },
+      { time: '14:35', value: 70028.00, type: '雙' },
+      { time: '14:40', value: 70000.33, type: '單' },
+      { time: '14:45', value: 70046.80, type: '雙' },
+      { time: '14:50', value: 70104.65, type: '單' },
+      { time: '14:55', value: 70113.00, type: '雙' },
+      { time: '15:00', value: 70097.18, type: '雙' },
+      { time: '15:05', value: 70108.50, type: '單' },
+      { time: '15:10', value: 70092.30, type: '雙' },
+      { time: '15:15', value: 70116.40, type: '單' },
+      { time: '15:20', value: 70102.80, type: '雙' }
+    ];
+
+    const rawKData = [
+      { time: '14:30', values: [70020, 70034, 70010, 70042], oddEven: '單' },
+      { time: '14:35', values: [70034, 70028, 70022, 70040], oddEven: '雙' },
+      { time: '14:40', values: [70028, 70000, 69992, 70031], oddEven: '單' },
+      { time: '14:45', values: [70000, 70046, 69996, 70055], oddEven: '雙' },
+      { time: '14:50', values: [70046, 70104, 70040, 70110], oddEven: '單' },
+      { time: '14:55', values: [70104, 70113, 70095, 70120], oddEven: '雙' },
+      { time: '15:00', values: [70113, 70097, 70090, 70118], oddEven: '雙' },
+      { time: '15:05', values: [70097, 70108, 70092, 70115], oddEven: '單' },
+      { time: '15:10', values: [70108, 70092, 70086, 70110], oddEven: '雙' },
+      { time: '15:15', values: [70092, 70116, 70088, 70122], oddEven: '單' },
+      { time: '15:20', values: [70116, 70102, 70098, 70118], oddEven: '雙' }
+    ];
+
+    const rawRhythmData = [
+      { time: '14:30', value: 70034, type: '單' },
+      { time: '14:35', value: 70020, type: '雙' },
+      { time: '14:40', value: 70048, type: '單' },
+      { time: '14:45', value: 70062, type: '單' },
+      { time: '14:50', value: 70018, type: '雙' },
+      { time: '14:55', value: 70028, type: '雙' },
+      { time: '15:00', value: 70056, type: '單' },
+      { time: '15:05', value: 70072, type: '單' },
+      { time: '15:10', value: 70030, type: '雙' },
+      { time: '15:15', value: 70066, type: '單' },
+      { time: '15:20', value: 70024, type: '雙' },
+      { time: '15:25', value: 70038, type: '單' },
+      { time: '15:30', value: 70012, type: '雙' },
+      { time: '15:35', value: 70058, type: '單' },
+      { time: '15:40', value: 70026, type: '雙' }
+    ];
+
+    const charts = {
+      style1: echarts.init(document.getElementById('chart-style-1')),
+      style2: echarts.init(document.getElementById('chart-style-2')),
+      style3: echarts.init(document.getElementById('chart-style-3'))
+    };
+
+    function buildTheme(isDark) {
+      return {
+        bg: isDark ? '#4b4b4b' : '#dbdbdb',
+        axis: isDark ? '#cfcfcf' : '#6e6e6e',
+        axisStrong: isDark ? '#d8d8d8' : '#707070',
+        text: isDark ? '#e5e5e5' : '#666666',
+        text2: isDark ? '#d0d0d0' : '#7a7a7a',
+        split: isDark ? 'rgba(255,255,255,0.18)' : '#e8edf1',
+        tooltipBg: isDark ? 'rgba(18,18,18,0.96)' : 'rgba(30,30,30,0.92)',
+        sliderBg: isDark ? '#434343' : '#ececec',
+        sliderBorder: isDark ? '#666666' : '#c6c6c6',
+        sliderFill: isDark ? 'rgba(69,184,147,0.28)' : 'rgba(58,168,135,0.18)',
+        area: isDark ? 'rgba(69,184,147,0.12)' : 'rgba(47,159,127,0.08)',
+        green: isDark ? '#45b893' : '#3aa887',
+        greenLine: isDark ? '#53c3a0' : '#2f9f7f',
+        blue: isDark ? '#4ea1ff' : '#3b82f6',
+        red: isDark ? '#ff6a6a' : '#e25353',
+        topBand: isDark ? 'rgba(78,161,255,0.08)' : 'rgba(59,130,246,0.06)',
+        bottomBand: isDark ? 'rgba(69,184,147,0.08)' : 'rgba(58,168,135,0.06)',
+        middleLine: isDark ? 'rgba(210,210,210,0.45)' : 'rgba(120,130,140,0.6)'
+      };
+    }
+
+    function buildZoom(theme) {
+      return [
+        {
+          type: 'inside',
+          xAxisIndex: 0,
+          zoomOnMouseWheel: true,
+          moveOnMouseMove: true,
+          moveOnMouseWheel: true
+        },
+        {
+          type: 'slider',
+          xAxisIndex: 0,
+          height: 22,
+          bottom: 22,
+          borderColor: theme.sliderBorder,
+          backgroundColor: theme.sliderBg,
+          fillerColor: theme.sliderFill,
+          handleSize: 16,
+          textStyle: { color: theme.text }
+        }
+      ];
+    }
+
+    function renderStyle1(theme) {
+      const xData = rawLineData.map(item => item.time);
+      const yData = rawLineData.map(item => item.value);
+      const markPointData = rawLineData.map((item, index) => {
+        const isOdd = item.type === '單';
+        return {
+          coord: [index, item.value],
+          value: `${item.type} ${item.value.toFixed(2)}`,
+          itemStyle: {
+            color: isOdd ? theme.blue : theme.green,
+            borderColor: isOdd ? theme.blue : theme.green
+          },
+          label: {
+            color: '#fff',
+            fontSize: 12,
+            padding: [5, 10],
+            borderRadius: 12,
+            backgroundColor: isOdd ? theme.blue : theme.green,
+            formatter: `${item.type} ${item.value.toFixed(2)}`
+          }
+        };
+      });
+
+      charts.style1.setOption({
+        backgroundColor: theme.bg,
+        grid: { left: 56, right: 20, top: 30, bottom: 90 },
+        tooltip: {
+          trigger: 'axis',
+          backgroundColor: theme.tooltipBg,
+          borderWidth: 0,
+          textStyle: { color: '#fff', fontSize: 12 },
+          formatter(params) {
+            const item = rawLineData[params[0].dataIndex];
+            return `時間：${item.time}<br/>指數：${item.value.toFixed(2)}<br/>單雙：${item.type || '-'}`;
+          }
+        },
+        xAxis: {
+          type: 'category',
+          boundaryGap: false,
+          data: xData,
+          axisLine: { lineStyle: { color: theme.axis, width: 1 } },
+          axisTick: { show: true, alignWithLabel: true, lineStyle: { color: theme.axis } },
+          axisLabel: { color: theme.text, fontSize: 12, interval: 0 },
+          splitLine: { show: false }
+        },
+        yAxis: {
+          type: 'value',
+          min: 69960,
+          max: 70170,
+          interval: 30,
+          axisLine: { show: false },
+          axisTick: { show: false },
+          axisLabel: { color: theme.text2, fontSize: 12, formatter: value => echarts.format.addCommas(value) },
+          splitLine: { show: true, lineStyle: { color: theme.split, width: 1 } }
+        },
+        dataZoom: buildZoom(theme),
+        series: [{
+          name: '走勢',
+          type: 'line',
+          smooth: 0.25,
+          showSymbol: false,
+          data: yData,
+          lineStyle: { color: theme.greenLine, width: 3 },
+          itemStyle: { color: theme.greenLine, borderColor: '#ffffff', borderWidth: 2 },
+          areaStyle: { color: theme.area },
+          markPoint: { symbol: 'circle', symbolSize: 12, data: markPointData, label: { show: true, position: 'top', distance: 10 } }
+        }]
+      }, true);
+    }
+
+    function renderStyle2(theme) {
+      const categoryData = rawKData.map(item => item.time);
+      const kData = rawKData.map(item => item.values);
+      const closeLineData = rawKData.map(item => item.values[1]);
+      const oddEvenLabelData = rawKData.map((item, index) => {
+        const high = item.values[3];
+        const isOdd = item.oddEven === '單';
+        return {
+          coord: [index, high + 8],
+          value: item.oddEven,
+          itemStyle: { color: isOdd ? theme.blue : theme.green },
+          label: {
+            show: true,
+            formatter: item.oddEven,
+            color: '#fff',
+            fontSize: 12,
+            padding: [4, 10],
+            borderRadius: 10,
+            backgroundColor: isOdd ? theme.blue : theme.green
+          }
+        };
+      });
+
+      charts.style2.setOption({
+        backgroundColor: theme.bg,
+        grid: { left: 56, right: 20, top: 34, bottom: 90 },
+        tooltip: {
+          trigger: 'axis',
+          axisPointer: { type: 'cross' },
+          backgroundColor: theme.tooltipBg,
+          borderWidth: 0,
+          textStyle: { color: '#fff', fontSize: 12 },
+          formatter(params) {
+            const idx = params[0].dataIndex;
+            const item = rawKData[idx];
+            const [open, close, low, high] = item.values;
+            return `時間：${item.time}<br/>開：${open}<br/>收：${close}<br/>低：${low}<br/>高：${high}<br/>單雙：${item.oddEven}`;
+          }
+        },
+        xAxis: {
+          type: 'category',
+          data: categoryData,
+          boundaryGap: true,
+          axisLine: { lineStyle: { color: theme.axis } },
+          axisTick: { show: true, lineStyle: { color: theme.axis } },
+          axisLabel: { color: theme.text, fontSize: 12, interval: 0 },
+          splitLine: { show: false }
+        },
+        yAxis: {
+          scale: true,
+          axisLine: { show: false },
+          axisTick: { show: false },
+          axisLabel: { color: theme.text2, fontSize: 12, formatter: value => echarts.format.addCommas(value) },
+          splitLine: { show: true, lineStyle: { color: theme.split, width: 1 } }
+        },
+        dataZoom: buildZoom(theme),
+        series: [
+          {
+            name: '分分彩',
+            type: 'candlestick',
+            data: kData,
+            barWidth: 18,
+            itemStyle: {
+              color: theme.red,
+              color0: theme.greenLine,
+              borderColor: theme.red,
+              borderColor0: theme.greenLine
+            },
+            markPoint: { symbol: 'roundRect', symbolSize: [1, 1], data: oddEvenLabelData, label: { position: 'inside' } }
+          },
+          {
+            name: '收盤線',
+            type: 'line',
+            data: closeLineData,
+            smooth: true,
+            symbol: 'circle',
+            symbolSize: 5,
+            lineStyle: { color: theme.blue, width: 2 },
+            itemStyle: { color: theme.blue }
+          }
+        ]
+      }, true);
+    }
+
+    function renderStyle3(theme) {
+      const xData = rawRhythmData.map(item => item.time);
+      const lineData = rawRhythmData.map(item => item.value);
+      const minY = 69980;
+      const maxY = 70080;
+      const midY = 70030;
+      const scatterData = rawRhythmData.map((item, index) => {
+        const isOdd = item.type === '單';
+        return {
+          value: [item.time, item.value],
+          itemStyle: { color: isOdd ? theme.blue : theme.green, borderColor: '#ffffff', borderWidth: 2 },
+          label: {
+            show: true,
+            position: index % 2 === 0 ? 'top' : 'bottom',
+            distance: 16,
+            formatter: `${item.type} ${echarts.format.addCommas(item.value)}`,
+            color: '#ffffff',
+            fontSize: 12,
+            fontWeight: 700,
+            padding: [6, 12],
+            borderRadius: 999,
+            backgroundColor: isOdd ? theme.blue : theme.green
+          }
+        };
+      });
+
+      charts.style3.setOption({
+        backgroundColor: theme.bg,
+        grid: { left: 80, right: 30, top: 40, bottom: 90 },
+        tooltip: {
+          trigger: 'axis',
+          axisPointer: { type: 'line', lineStyle: { color: theme.middleLine, width: 1 } },
+          backgroundColor: theme.tooltipBg,
+          borderWidth: 0,
+          padding: 12,
+          textStyle: { color: '#fff', fontSize: 12 },
+          formatter(params) {
+            const linePoint = params.find(p => p.seriesName === '走勢');
+            const item = rawRhythmData[linePoint.dataIndex];
+            return `<div style="line-height:1.8;"><div>時間：${item.time}</div><div>數值：${echarts.format.addCommas(item.value)}</div><div>單雙：${item.type}</div></div>`;
+          }
+        },
+        xAxis: {
+          type: 'category',
+          boundaryGap: false,
+          data: xData,
+          axisLine: { lineStyle: { color: theme.axisStrong, width: 1.5 } },
+          axisTick: { show: true, alignWithLabel: true, lineStyle: { color: theme.axisStrong } },
+          axisLabel: { color: theme.text, fontSize: 13, margin: 12 },
+          splitLine: { show: false }
+        },
+        yAxis: {
+          type: 'value',
+          min: minY,
+          max: maxY,
+          interval: 20,
+          axisLine: { show: true, lineStyle: { color: theme.axisStrong, width: 1.5 } },
+          axisTick: { show: false },
+          axisLabel: { color: theme.text2, fontSize: 13, margin: 12, formatter: value => echarts.format.addCommas(value) },
+          splitLine: { show: true, lineStyle: { color: theme.split, width: 1 } }
+        },
+        dataZoom: buildZoom(theme),
+        series: [
+          {
+            name: '單雙區域',
+            type: 'line',
+            data: lineData,
+            lineStyle: { opacity: 0 },
+            symbol: 'none',
+            silent: true,
+            markArea: {
+              silent: true,
+              itemStyle: { opacity: 1 },
+              data: [
+                [{ yAxis: midY, itemStyle: { color: theme.topBand } }, { yAxis: maxY }],
+                [{ yAxis: minY, itemStyle: { color: theme.bottomBand } }, { yAxis: midY }]
+              ]
+            },
+            markLine: {
+              silent: true,
+              symbol: ['none', 'none'],
+              lineStyle: { color: theme.middleLine, type: 'dashed', width: 1.5 },
+              label: { show: false },
+              data: [{ yAxis: midY }]
+            }
+          },
+          {
+            name: '走勢',
+            type: 'line',
+            smooth: 0.28,
+            data: lineData,
+            symbol: 'none',
+            lineStyle: { color: theme.greenLine, width: 4 },
+            areaStyle: { color: theme.area },
+            emphasis: { focus: 'series' }
+          },
+          {
+            name: '節點',
+            type: 'scatter',
+            data: scatterData,
+            symbolSize: 12,
+            z: 5,
+            emphasis: { scale: 1.15 }
+          }
+        ]
+      }, true);
+    }
+
+    function renderAll(isDark) {
+      document.body.classList.toggle('dark', isDark);
+      const theme = buildTheme(isDark);
+      renderStyle1(theme);
+      renderStyle2(theme);
+      renderStyle3(theme);
+      document.getElementById('light-btn').classList.toggle('active', !isDark);
+      document.getElementById('dark-btn').classList.toggle('active', isDark);
+    }
+
+    document.getElementById('light-btn').addEventListener('click', () => renderAll(false));
+    document.getElementById('dark-btn').addEventListener('click', () => renderAll(true));
+
+    renderAll(false);
+    window.addEventListener('resize', () => Object.values(charts).forEach(chart => chart.resize()));
+  </script>
+</body>
+</html>
