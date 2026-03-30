@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>分分彩樣式 Demo</title>
+  <title>分分彩三種圖表樣式 Demo</title>
   <script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
   <style>
     * { box-sizing: border-box; }
@@ -167,8 +167,8 @@
   <div class="page">
     <div class="header">
       <div>
-        <h1>分分彩樣式 Demo</h1>
-        <p>折線圖、蠟燭圖、單雙節奏圖</p>
+        <h1>分分彩圖表樣式總覽</h1>
+        <p>整合三種可操作圖表樣式：折線圖、蠟燭圖、單雙節奏圖</p>
       </div>
       <div class="legend-group">
         <span class="pill blue">單</span>
@@ -185,7 +185,7 @@
         <div class="card-head">
           <div>
             <h2>樣式 1</h2>
-            <span>折線圖版</span>
+            <span>折線圖版：偏即時盤勢、閱讀最直覺</span>
           </div>
           <div class="legend-group">
             <span class="pill blue">單</span>
@@ -199,7 +199,7 @@
         <div class="card-head">
           <div>
             <h2>樣式 2</h2>
-            <span>蠟燭圖版</span>
+            <span>蠟燭圖版：偏盤口感、可看每期波動</span>
           </div>
           <div class="legend-group">
             <span class="pill blue">單</span>
@@ -213,7 +213,7 @@
         <div class="card-head">
           <div>
             <h2>樣式 3</h2>
-            <span>單雙節奏圖</span>
+            <span>單雙節奏圖：玩法語意最強、辨識單雙節奏最快</span>
           </div>
           <div class="legend-group">
             <span class="pill blue">單</span>
@@ -536,9 +536,19 @@
           min: minY,
           max: maxY,
           interval: 20,
-          axisLine: { show: true, lineStyle: { color: theme.axisStrong, width: 1.5 } },
+          axisLine: { show: false },
           axisTick: { show: false },
-          axisLabel: { color: theme.text2, fontSize: 13, margin: 12, formatter: value => echarts.format.addCommas(value) },
+          axisLabel: {
+            color: theme.text2,
+            fontSize: 15,
+            fontWeight: 700,
+            margin: 18,
+            formatter: value => {
+              if (value === maxY) return '單';
+              if (value === minY) return '雙';
+              return '';
+            }
+          },
           splitLine: { show: true, lineStyle: { color: theme.split, width: 1 } }
         },
         dataZoom: buildZoom(theme),
